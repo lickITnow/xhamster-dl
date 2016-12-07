@@ -84,10 +84,10 @@ echo "Extracting video URL from.. ==> $URL"
 EXTRACTED_URL=`curl -s $URL                     | # download HTML using curl
         tr -d '\n'                              | # remove carriage returns
         sed 's#</#\n</#g'                       | # tokenize by HTML tag
-        grep 'mp4File='                         | # locate lines with "mp4File="
+        grep 'mp4Thumb'                         | # locate lines with "mp4Thumb"
         tr '\n' @                               | # tokenize by line
         cut -d@ -f1                             | # isolate first instance
-        sed 's/^.*mp4File=\([^\"]*\)\".*$/\1/g' | # capture everything between "mp4File=" and "\""
+        sed 's/^.*href="\([^"]*\)".*$/\1/'      | # capture everything in "href="
         sed 's#\%3A#:#g'                        | # replace %3A --> :
         sed 's#\%3B#;#g'                        | # replace %3B --> ;
         sed 's#\%2F#/#g'                        | # replace %2F --> /
@@ -115,11 +115,9 @@ echo -e "#!/bin/bash\n\n$0 $@" > $LOCAL_FILE
 chmod +x $LOCAL_FILE
 trap "cleanup $LOCAL_FILE $TEMP DONE" EXIT
 DONE=0
-#curl $EXTRACTED_URL > $TEMP
-USER_AGENT="Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Ubuntu/10.04 Chromium/7.0.517.44 Chrome/7.0.517.44 Safari/534.7" 
-wget -c -U "$USER_AGENT" $EXTRACTED_URL -O $TEMP
+wget $EXTRACTED_URL -O $TEMP
 mv $TEMP $LOCAL_FILE
 DONE=1
 
 echo ""
-echo "Download complete! ==> $LOCAL_FILE"
+echo "Download complete! ==> $LOCAL_FILE"s
